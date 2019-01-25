@@ -1,4 +1,5 @@
 from gino import Gino
+import datetime
 
 db = Gino()
 
@@ -47,3 +48,16 @@ class Group(db.Model):
     @classmethod
     async def get_by_id(cls, uid):
         return await cls.query.where(cls.id == uid).gino.first()
+
+
+class Statistic(db.Model):
+    __tablename__ = 'statistics'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    message = db.Column(db.Unicode())
+    date = db.Column(db.DateTime(), default=datetime.datetime.now)
+
+    @classmethod
+    async def new(cls, user_id, message):
+        instance = await cls.create(user_id=user_id, message=message)
+        return instance

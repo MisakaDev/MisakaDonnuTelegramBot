@@ -75,7 +75,7 @@ async def schedule_next_week(message):
 async def schedule_by_day(message, state: FSMContext):
     if message.text == "⬅️Назад":
         await state.finish()
-        return await back(message)
+        return await schedule(message)
     user = await User.get_or_create(telegram_id=message.from_user.id)
     if message.text != '📓 По даті':
         try:
@@ -93,7 +93,7 @@ async def schedule_by_day(message, state: FSMContext):
 async def schedule_by_week(message, state: FSMContext):
     if message.text == "⬅️Назад":
         await state.finish()
-        return await back(message)
+        return await schedule(message)
     user = await User.get_or_create(telegram_id=message.from_user.id)
     if message.text != '📔 По тиждні':
         try:

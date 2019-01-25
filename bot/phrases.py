@@ -1,5 +1,5 @@
 import random
-from bot.helpers import get_day_name, get_pair_time
+from bot.helpers import get_day_name, get_pair_time, get_pair_status
 
 start = lambda: random.choice(('Привіт. Для початку давай познайомимось.',))
 start_error = lambda: random.choice(('Ми вже знайомі.', 'Я тебе пам\'ятаю.',))
@@ -28,17 +28,21 @@ user_help = lambda: "Ого, все настільки погано що тоб�
 
 schedule_for = lambda: random.choice(("Ось розклад на: ", "Тримай розклад на: "))
 
-free_day = lambda: random.choice(("В цей день пар не буде", ))
+free_day = lambda: random.choice(("В цей день пар не буде",))
 
-format_parse_error = lambda: random.choice(("Я не розумію що тут написанно, спробуй ще раз", ))
+format_parse_error = lambda: random.choice(("Я не розумію що тут написанно, спробуй ще раз",))
 
-features = lambda: random.choice(("Ось що я ще вмію", ))
+features = lambda: random.choice(("Ось що я ще вмію",))
 
-user_has_no_group = lambda: random.choice(("Для початку вкажи свою групу в налаштуваннях", ))
+user_has_no_group = lambda: random.choice(("Для початку вкажи свою групу в налаштуваннях",))
 
 
 def render_pair_info():
-    return "\n".join(["{} пара: {}".format(number, get_pair_time(number)) for number in range(1, 9)])
+    return "\n".join(["{} {} пара: {}".format(
+        get_pair_status(number),
+        number,
+        get_pair_time(number)
+    ) for number in range(1, 9)],)
 
 
 def render_user_info(user, group):
