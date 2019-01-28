@@ -1,5 +1,3 @@
-TELEGRAM_API_TOKEN = '<ENTER>'
-
 # Pair timing
 PAIR_TIME = (("8:00", "9:20"),
              ("9:45", "11:05"),
