@@ -12,4 +12,4 @@ from db import User, Statistic
 class StatisticMiddleware(BaseMiddleware):
     async def on_pre_process_message(self, message: types.Message, data: dict):
         user = await User.get_or_create(message.from_user.id)
-        await Statistic.new(user.id, message.text)
+        await Statistic.create(user.id, message.text)

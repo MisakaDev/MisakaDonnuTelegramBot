@@ -1,7 +1,21 @@
 from gino import Gino
 import datetime
+import config
 
 db = Gino()
+
+
+async def prepare_db():
+    try:
+        await db.set_bind('postgresql://{}:{}@{}/{}'.format(config.DB_USER_LOGIN,
+                                                            config.DB_USER_PASSWORD,
+                                                            config.DB_HOST,
+                                                            config.DB_NAME)
+                          )
+        await db.gino.create_all()
+    except Exception as error:
+        print(f"Error on prepare database: {error}")
+        exit()
 
 
 class User(db.Model):
@@ -58,6 +72,5 @@ class Statistic(db.Model):
     date = db.Column(db.DateTime(), default=datetime.datetime.now)
 
     @classmethod
-    async def new(cls, user_id, message):
-        instance = await cls.create(user_id=user_id, message=message)
-        return instance
+    async def create(cls, user_id, message):
+        return await super().create(user_id=user_id, message=message)
