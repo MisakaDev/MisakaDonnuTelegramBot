@@ -1,5 +1,9 @@
 import random
+import datetime
 from bot.helpers import get_day_name, get_pair_time, get_pair_status
+
+from db import Statistic
+
 
 start = lambda: random.choice(('Привіт. Для початку давай познайомимось.',))
 start_error = lambda: random.choice(('Ми вже знайомі.', 'Я тебе пам\'ятаю.',))
@@ -71,3 +75,35 @@ def render_schedule_for_week(schedule_info):
     for day, schedule_data in schedule_info.items():
         reply += "==========\n" + render_schedule_for_date(schedule_data, day, header=False)
     return reply
+
+
+async def render_statistics():
+    now = datetime.datetime.now()
+
+    count_by_hours = await Statistic.count_by_date_interval(now - datetime.timedelta(hours=1), now)
+    count_by_day = await Statistic.count_by_date_interval(now - datetime.timedelta(days=1), now)
+    count_by_month = await Statistic.count_by_date_interval(now - datetime.timedelta(days=30), now)
+
+    count = "🔄 Оброблено повідомлень: \n \tЗа годину: {} \n \tЗа день: {} \n \tЗа місяць: {}".format(
+        count_by_hours,
+        count_by_day,
+        count_by_month
+    )
+
+    user_by_hours = await Statistic.active_users_by_date_interval(now - datetime.timedelta(hours=1), now)
+    user_by_day = await Statistic.active_users_by_date_interval(now - datetime.timedelta(days=1), now)
+    user_by_month = await Statistic.active_users_by_date_interval(now - datetime.timedelta(days=30), now)
+
+    user = "🚻 Активних користувачів: \n \tЗа годину: {} \n \tЗа день: {} \n \tЗа місяць: {}".format(
+        user_by_hours,
+        user_by_day,
+        user_by_month
+    )
+
+    top_message = (await Statistic.message_rating())[:3]
+
+    top = "🆙 Найпопулярніший запит: \n \t{}".format(
+        "\n \t".join(['{} - {}'.format(count, message) for message, count in top_message])
+    )
+
+    return "{}\n{}\n{}".format(count, user, top)

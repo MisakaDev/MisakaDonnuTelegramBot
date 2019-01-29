@@ -35,6 +35,7 @@ def back_menu():
 def features_menu():
     markup = types.ReplyKeyboardMarkup()
     markup.row(types.KeyboardButton("🕗 Розклад пар"))
+    markup.row(types.KeyboardButton("🧮 Статистика"))
     markup.row(types.KeyboardButton("⬅️Назад"))
     return markup
 

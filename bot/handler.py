@@ -138,13 +138,18 @@ async def features(message):
 
 
 @dp.message_handler(lambda message: message.text == '🕗 Розклад пар')
-async def features(message):
+async def features_pair_info(message):
     await bot.send_message(message.chat.id, phrases.render_pair_info(), reply_markup=menu.features_menu())
 
 
 @dp.message_handler(lambda message: message.text == '🔮 Допомога')
 async def user_help(message):
     await bot.send_message(message.chat.id, phrases.user_help(), reply_markup=menu.default_menu())
+
+
+@dp.message_handler(lambda message: message.text == '🧮 Статистика')
+async def statistic(message):
+    await bot.send_message(message.chat.id, await phrases.render_statistics(), reply_markup=menu.features_menu())
 
 
 @dp.message_handler()

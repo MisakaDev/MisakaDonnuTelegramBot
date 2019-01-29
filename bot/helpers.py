@@ -1,6 +1,6 @@
-import datetime
 from bot.config import DAYS_NAME, PAIR_TIME
 import datetime
+
 
 def get_start_week(date):
     start = date - datetime.timedelta(days=date.isoweekday() - 1)

@@ -1,6 +1,7 @@
-from gino import Gino
 import datetime
 import config
+
+from gino import Gino
 
 db = Gino()
 
@@ -74,3 +75,44 @@ class Statistic(db.Model):
     @classmethod
     async def create(cls, user_id, message):
         return await super().create(user_id=user_id, message=message)
+
+    @classmethod
+    async def message_rating(cls):
+        count = db.func.count(cls.id)
+        return await db.select([
+            cls.message,
+            count,
+        ]).select_from(
+            cls
+        ).group_by(
+            cls.message,
+        ).order_by(
+            count.desc()
+        ).gino.all()
+
+    @classmethod
+    async def count_by_date_interval(cls, start, end):
+        count = db.func.count(cls.id)
+        return await db.select(
+            [count]
+        ).select_from(
+            cls
+        ).where(
+            cls.date > start
+        ).where(
+            cls.date < end
+        ).gino.scalar()
+
+    @classmethod
+    async def active_users_by_date_interval(cls, start, end):
+        return len(await db.select(
+            [cls.user_id]
+        ).select_from(
+            cls
+        ).where(
+            cls.date > start
+        ).where(
+            cls.date < end
+        ).group_by(
+            cls.user_id
+        ).gino.all())
