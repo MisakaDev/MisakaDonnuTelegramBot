@@ -15,15 +15,15 @@ if not (TELEGRAM_API_TOKEN and DB_USER_LOGIN and DB_USER_PASSWORD and DB_HOST an
     print('########################################')
     print('## Please, set next environ variable: ##')
     if not TELEGRAM_API_TOKEN:
-        print('## - TELEGRAM_API_TOKEN               ##')
+        print('## - DONNU_BOT_TELEGRAM_API_TOKEN     ##')
     if not DB_USER_LOGIN:
         print('## - DONNU_BOT_DB_USER_LOGIN          ##')
     if not DB_USER_PASSWORD:
         print('## - DONNU_BOT_DB_USER_PASSWORD       ##')
     if not DB_HOST:
-        print('## - DB_HOST                          ##')
+        print('## - DONNU_BOT_DB_HOST                ##')
     if not DB_NAME:
-        print('## - DB_NAME                          ##')
+        print('## - DONNU_BOT_DB_NAME                ##')
 
     print('## See docs: https://git.io/fhPUh     ##')
     print('########################################')

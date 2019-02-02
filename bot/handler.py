@@ -12,7 +12,7 @@ from aiogram.dispatcher import FSMContext
 
 
 @dp.message_handler(commands=['start', 'help'])
-async def start(message: types.Message):
+async def start(message: types.Message, state: FSMContext):
     user = await User.get_or_create(telegram_id=message.from_user.id)
     if user.group_id:
         return await bot.send_message(message.chat.id, phrases.start_error())
@@ -20,7 +20,7 @@ async def start(message: types.Message):
     message.text = '🏷 Змінити групу'
     await bot.send_message(message.chat.id, phrases.start())
 
-    await setting_change_group(message)
+    await setting_change_group(message, state)
 
 
 @dp.message_handler(lambda message: message.text == '⬅️Назад')
