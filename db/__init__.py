@@ -37,7 +37,11 @@ class User(db.Model):
         await self.update(group_id=group_id).apply()
 
     async def get_schedule_by_day(self, date):
-        return []
+        return await Schedule.query.where(
+            Schedule.group_id == self.group_id
+        ).where(
+            Schedule.date == date.date()
+        ).gino.all()
 
 
 class Group(db.Model):
@@ -63,6 +67,20 @@ class Group(db.Model):
     @classmethod
     async def get_by_id(cls, uid):
         return await cls.query.where(cls.id == uid).gino.first()
+
+
+class Schedule(db.Model):
+    __tablename__ = 'schedules'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    pair_number = db.Column(db.Integer(),)
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
+    information = db.Column(db.Unicode())
+    date = db.Column(db.Date(), default=datetime.datetime.now)
+
+    @classmethod
+    async def create(cls, group_id, date, pair_number, information):
+        return await super().create(group_id=group_id, pair_number=pair_number, information=information, date=date)
 
 
 class Statistic(db.Model):
