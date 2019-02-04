@@ -40,8 +40,17 @@ def features_menu():
     return markup
 
 
-async def group_menu():
+async def course_menu():
     markup = types.ReplyKeyboardMarkup()
-    for group in await Group.get_all():
+    for group in await Group.get_course_list():
+        markup.row(types.KeyboardButton(group.course))
+    markup.row(types.KeyboardButton("⬅️Назад"))
+    return markup
+
+
+async def group_menu(course):
+    markup = types.ReplyKeyboardMarkup()
+    for group in await Group.get_by_course(course):
         markup.row(types.KeyboardButton(group.name))
+    markup.row(types.KeyboardButton("⬅️Назад"))
     return markup

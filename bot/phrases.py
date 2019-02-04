@@ -8,6 +8,9 @@ from db import Statistic
 start = lambda: random.choice(('Привіт. Для початку давай познайомимось.',))
 start_error = lambda: random.choice(('Ми вже знайомі.', 'Я тебе пам\'ятаю.',))
 
+course_select = lambda: random.choice(("Вибери курс на якому ти навчаєшся",))
+course_unknown = lambda: random.choice(('В мене немає інформації про такий курс',))
+
 group_select = lambda: random.choice(("Вибери свою группу", "В якій групі ти навчаєшся?"))
 group_unknown = lambda: random.choice(('В мене немає інформації про таку группу',))
 group_success = lambda: random.choice(('Добре, я тебе запам\'ятав',))

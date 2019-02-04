@@ -117,19 +117,49 @@ async def setting(message):
 
 
 @dp.message_handler(lambda message: message.text == '🏷 Змінити групу')
-@dp.message_handler(state='change_group')
 async def setting_change_group(message: types.Message, state: FSMContext):
+    await bot.send_message(message.chat.id, phrases.course_select(), reply_markup=await menu.course_menu())
+    await state.set_state('change_group_select_course')
+
+
+@dp.message_handler(state='change_group_select_course')
+async def change_group_select_course(message: types.Message, state: FSMContext):
+    if message.text == "⬅️Назад":
+        await state.finish()
+        return await setting(message)
+
+    group_count = len(await Group.get_by_course(message.text))
+
+    if not group_count:
+        await bot.send_message(message.chat.id, phrases.course_unknown())
+        await setting_change_group(message, state)
+        return
+    save = {'course': str(message.text)}
+
+    await state.set_data(save)
+    await state.set_state('change_group_select_group')
+    await bot.send_message(message.chat.id, phrases.group_select(), reply_markup=await menu.group_menu(message.text))
+
+
+@dp.message_handler(state='change_group_select_group')
+async def change_group_select_group(message: types.Message, state: FSMContext):
+    if message.text == "⬅️Назад":
+        await state.set_state('change_group_select_course')
+        return await setting_change_group(message, state)
+    save = await state.get_data()
+    course = save.get('course')
+    group = await Group.get(message.text, course)
+
+    if not group:
+        await bot.send_message(message.chat.id, phrases.group_unknown())
+        message.text = course
+        await change_group_select_course(message, state)
+        return
+
     user = await User.get_or_create(telegram_id=message.from_user.id)
-    if message.text != '🏷 Змінити групу':
-        group = await Group.get(message.text)
-        if group:
-            await user.set_group(group.id)
-            await state.finish()
-            return await bot.send_message(message.chat.id, phrases.group_success(), reply_markup=menu.default_menu())
-        else:
-            return await bot.send_message(message.chat.id, phrases.group_unknown())
-    await bot.send_message(message.chat.id, phrases.group_select(), reply_markup=await menu.group_menu())
-    await state.set_state('change_group')
+    await user.set_group(group.id)
+    await bot.send_message(message.chat.id, phrases.group_success(), reply_markup=menu.default_menu())
+    await state.finish()
 
 
 @dp.message_handler(lambda message: message.text == '🎮 Фічі')

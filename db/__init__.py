@@ -47,13 +47,14 @@ class User(db.Model):
 class Group(db.Model):
     __tablename__ = 'groups'
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.Unicode(), unique=True)
+    name = db.Column(db.Unicode())
+    course = db.Column(db.Unicode())
 
     @classmethod
-    async def get_or_create(cls, name):
-        instance = await cls.query.where(cls.name == name).gino.first()
+    async def get_or_create(cls, name, course):
+        instance = await cls.query.where(cls.name == name).where(cls.course == course).gino.first()
         if not instance:
-            instance = await cls.create(name=name)
+            instance = await cls.create(name=name, course=course)
         return instance
 
     @classmethod
@@ -61,12 +62,28 @@ class Group(db.Model):
         return await cls.query.gino.all()
 
     @classmethod
-    async def get(cls, name):
-        return await cls.query.where(cls.name == name).gino.first()
+    async def get(cls, name, course):
+        return await cls.query.where(cls.name == name).where(cls.course == course).gino.first()
 
     @classmethod
     async def get_by_id(cls, uid):
         return await cls.query.where(cls.id == uid).gino.first()
+
+    @classmethod
+    async def get_by_course(cls, course):
+        return await cls.query.where(cls.course == course).gino.all()
+
+    @classmethod
+    async def get_course_list(cls):
+        return await db.select([
+            cls.course,
+        ]).select_from(
+            cls
+        ).group_by(
+            cls.course,
+        ).order_by(
+            cls.course.desc()
+        ).gino.all()
 
 
 class Schedule(db.Model):

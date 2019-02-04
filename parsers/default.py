@@ -1,6 +1,5 @@
 from openpyxl import load_workbook
 from db import Group, Schedule, prepare_db
-from datetime import datetime
 import asyncio
 
 
@@ -18,28 +17,43 @@ class TableParser:
                     self.table.cell(row, col).value = self.table.cell(crange.min_row, crange.min_col).value
 
     async def parse(self):
-        START_COL = 2
-        START_ROW = 3
-        LENGTH = 7
-        WEEKS = 1
-        self.groups = [self.table.cell(START_ROW, col).value for col in range(START_COL, START_COL + LENGTH)]
-        for week in range(WEEKS):
-            for day in range(6):
-                for number, group in enumerate(self.groups):
-                    date = str(self.table.cell(1 + 11 * week, 2 + LENGTH * day + number).value).split(" ")[0]
-                    for p_n, row in enumerate(range(4 + 11 * week, 12 + 11 * week)):
-                        if self.table.cell(row, 2 + LENGTH * day + number).value:
-                            _group = await Group.get_or_create(group)
-                            await Schedule.create(group_id=_group.id,
-                                                  date=datetime.strptime(date, '%Y-%m-%d').date(),
-                                                  pair_number=p_n + 1,
-                                                  information=self.table.cell(row, 2 + LENGTH * day + number).value)
+        for table_name in self.docs.sheetnames:
+            print(f"parse: {table_name}")
+            self.table = self.docs.get_sheet_by_name(table_name)
+            self._merged_cells_fill()
+            row = 13
+
+            while True:
+                col = 2
+
+                date = self.table.cell(row, col).value
+                group = self.table.cell(row + 2, col).value
+                if not (date and group):
+                    row += 1
+                    date = self.table.cell(row, col).value
+                    if not (date and group) or date == 'пн':
+                        break
+
+                while True:
+                    date = self.table.cell(row, col).value
+                    group = self.table.cell(row + 2, col).value
+                    if not date or not group:
+                        break
+                    group_id = (await Group.get_or_create(group, table_name)).id
+                    for i in range(1, 9):
+                        information = self.table.cell(row + 2 + i, col).value
+                        if information:
+                            await Schedule.create(group_id, date, i, information)
+
+                    col += 1
+                row += 12
+            print(f"parsed: {table_name}")
 
 
 async def run():
     await prepare_db()
 
-    parser = TableParser('../data/table.xlsx')
+    parser = TableParser('../data/table2.xlsx')
     await parser.parse()
 
 
