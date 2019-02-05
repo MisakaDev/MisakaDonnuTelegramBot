@@ -1,8 +1,25 @@
-import random
 import datetime
-from bot.helpers import get_day_name, get_pair_time, get_pair_status
+import random
 
+from bot.helpers import get_day_name, get_pair_time, get_pair_status
 from db import Statistic
+
+
+class Keyboard:
+    SCHEDULE = '🗓 Розклад'
+    SCHEDULE_TODAY = "📕 На сьогодні"
+    SCHEDULE_TOMORROW = "📗 На завтра"
+    SCHEDULE_CURRENT_WEEK = "📘 На цей тиждень"
+    SCHEDULE_NEXT_WEEK = "📙 На наступний тиждень"
+    SCHEDULE_BY_DAY = "📓 По даті"
+    SCHEDULE_BY_WEEK = "📔 По тиждні"
+    FEATURE = "🎮 Фічі"
+    FEATURE_PAIR_INFO = '🕗 Розклад пар'
+    FEATURE_STATISTIC = '🧮 Статистика'
+    SETTING = "⚙️ Налаштування"
+    SETTING_CHANGE_GROUP = "🏷 Змінити групу"
+    BACK = "⬅️Назад"
+    HELP = "🔮 Допомога"
 
 
 start = lambda: random.choice(('Привіт. Для початку давай познайомимось.',))

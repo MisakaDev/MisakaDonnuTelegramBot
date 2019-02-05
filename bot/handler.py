@@ -1,14 +1,14 @@
-from . import dp, bot
-from aiogram import types
-
-from db import User, Group
 import datetime
 
-import bot.phrases as phrases
-import bot.menu as menu
-import bot.helpers as helpers
-
+from aiogram import types
 from aiogram.dispatcher import FSMContext
+
+import bot.helpers as helpers
+import bot.menu as menu
+import bot.phrases as phrases
+from db import User, Group
+from . import dp, bot
+from .phrases import Keyboard
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -23,12 +23,12 @@ async def start(message: types.Message, state: FSMContext):
     await setting_change_group(message, state)
 
 
-@dp.message_handler(lambda message: message.text == '⬅️Назад')
+@dp.message_handler(lambda message: message.text == Keyboard.BACK)
 async def back(message):
     await bot.send_message(message.chat.id, phrases.back(), reply_markup=menu.default_menu())
 
 
-@dp.message_handler(lambda message: message.text == '🗓 Розклад')
+@dp.message_handler(lambda message: message.text == Keyboard.SCHEDULE)
 async def schedule(message):
     user = await User.get_or_create(telegram_id=message.from_user.id)
     if not user.group_id:
@@ -36,14 +36,14 @@ async def schedule(message):
     await bot.send_message(message.chat.id, phrases.schedule(), reply_markup=menu.schedule_menu())
 
 
-@dp.message_handler(lambda message: message.text == '📕 На сьогодні')
+@dp.message_handler(lambda message: message.text == Keyboard.SCHEDULE_TODAY)
 async def schedule_today(message):
     user = await User.get_or_create(telegram_id=message.from_user.id)
     schedule_for_date = await user.get_schedule_by_day(message.date)
     await bot.send_message(message.chat.id, phrases.render_schedule_for_date(schedule_for_date, message.date))
 
 
-@dp.message_handler(lambda message: message.text == '📗 На завтра')
+@dp.message_handler(lambda message: message.text == Keyboard.SCHEDULE_TOMORROW)
 async def schedule_tomorrow(message):
     user = await User.get_or_create(telegram_id=message.from_user.id)
     tomorrow_date = message.date + datetime.timedelta(days=1)
@@ -51,7 +51,7 @@ async def schedule_tomorrow(message):
     await bot.send_message(message.chat.id, phrases.render_schedule_for_date(schedule_for_date, tomorrow_date))
 
 
-@dp.message_handler(lambda message: message.text == '📘 На цей тиждень')
+@dp.message_handler(lambda message: message.text == Keyboard.SCHEDULE_CURRENT_WEEK)
 async def schedule_current_week(message):
     user = await User.get_or_create(telegram_id=message.from_user.id)
     week_start = helpers.get_start_week(message.date)
@@ -60,7 +60,7 @@ async def schedule_current_week(message):
     await bot.send_message(message.chat.id, phrases.render_schedule_for_week(week_schedule))
 
 
-@dp.message_handler(lambda message: message.text == '📙 На наступний тиждень')
+@dp.message_handler(lambda message: message.text == Keyboard.SCHEDULE_NEXT_WEEK)
 async def schedule_next_week(message):
     user = await User.get_or_create(telegram_id=message.from_user.id)
     message_date = message.date + datetime.timedelta(days=7)
@@ -70,16 +70,16 @@ async def schedule_next_week(message):
     await bot.send_message(message.chat.id, phrases.render_schedule_for_week(week_schedule))
 
 
-@dp.message_handler(lambda message: message.text == '📓 По даті')
+@dp.message_handler(lambda message: message.text == Keyboard.SCHEDULE_BY_DAY)
 @dp.message_handler(state='schedule_by_day')
 async def schedule_by_day(message, state: FSMContext):
-    if message.text == "⬅️Назад":
+    if message.text == Keyboard.BACK:
         await state.finish()
         return await schedule(message)
     user = await User.get_or_create(telegram_id=message.from_user.id)
-    if message.text != '📓 По даті':
+    if message.text != Keyboard.SCHEDULE_BY_DAY:
         try:
-            message_date = datetime.datetime.strptime(message.text, '%d.%m.%Y').date()
+            message_date = datetime.datetime.strptime(message.text, '%d.%m.%Y')
             schedule_for_date = await user.get_schedule_by_day(message_date)
             await bot.send_message(message.chat.id, phrases.render_schedule_for_date(schedule_for_date, message_date))
         except:
@@ -88,16 +88,16 @@ async def schedule_by_day(message, state: FSMContext):
     await state.set_state('schedule_by_day')
 
 
-@dp.message_handler(lambda message: message.text == '📔 По тиждні')
+@dp.message_handler(lambda message: message.text == Keyboard.SCHEDULE_BY_WEEK)
 @dp.message_handler(state='schedule_by_week')
 async def schedule_by_week(message, state: FSMContext):
-    if message.text == "⬅️Назад":
+    if message.text == Keyboard.BACK:
         await state.finish()
         return await schedule(message)
     user = await User.get_or_create(telegram_id=message.from_user.id)
-    if message.text != '📔 По тиждні':
+    if message.text != Keyboard.SCHEDULE_BY_WEEK:
         try:
-            message_date = datetime.datetime.strptime(message.text, '%d.%m.%Y').date()
+            message_date = datetime.datetime.strptime(message.text, '%d.%m.%Y')
             week_start = helpers.get_start_week(message_date)
             week_days = [week_start + datetime.timedelta(days=delta) for delta in range(6)]
             week_schedule = {day: await user.get_schedule_by_day(day) for day in week_days}
@@ -108,7 +108,7 @@ async def schedule_by_week(message, state: FSMContext):
     await state.set_state('schedule_by_week')
 
 
-@dp.message_handler(lambda message: message.text == '⚙️ Налаштування')
+@dp.message_handler(lambda message: message.text == Keyboard.SETTING)
 async def setting(message):
     user = await User.get_or_create(message.from_user.id)
     group = await Group.get_by_id(user.group_id)
@@ -116,7 +116,7 @@ async def setting(message):
                            reply_markup=menu.setting_menu())
 
 
-@dp.message_handler(lambda message: message.text == '🏷 Змінити групу')
+@dp.message_handler(lambda message: message.text == Keyboard.SETTING_CHANGE_GROUP)
 async def setting_change_group(message: types.Message, state: FSMContext):
     await bot.send_message(message.chat.id, phrases.course_select(), reply_markup=await menu.course_menu())
     await state.set_state('change_group_select_course')
@@ -124,7 +124,7 @@ async def setting_change_group(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state='change_group_select_course')
 async def change_group_select_course(message: types.Message, state: FSMContext):
-    if message.text == "⬅️Назад":
+    if message.text == Keyboard.BACK:
         await state.finish()
         return await setting(message)
 
@@ -143,7 +143,7 @@ async def change_group_select_course(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state='change_group_select_group')
 async def change_group_select_group(message: types.Message, state: FSMContext):
-    if message.text == "⬅️Назад":
+    if message.text == Keyboard.BACK:
         await state.set_state('change_group_select_course')
         return await setting_change_group(message, state)
     save = await state.get_data()
@@ -162,22 +162,22 @@ async def change_group_select_group(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(lambda message: message.text == '🎮 Фічі')
+@dp.message_handler(lambda message: message.text == Keyboard.FEATURE)
 async def features(message):
     await bot.send_message(message.chat.id, phrases.features(), reply_markup=menu.features_menu())
 
 
-@dp.message_handler(lambda message: message.text == '🕗 Розклад пар')
+@dp.message_handler(lambda message: message.text == Keyboard.FEATURE_PAIR_INFO)
 async def features_pair_info(message):
     await bot.send_message(message.chat.id, phrases.render_pair_info(), reply_markup=menu.features_menu())
 
 
-@dp.message_handler(lambda message: message.text == '🔮 Допомога')
+@dp.message_handler(lambda message: message.text == Keyboard.HELP)
 async def user_help(message):
     await bot.send_message(message.chat.id, phrases.user_help(), reply_markup=menu.default_menu())
 
 
-@dp.message_handler(lambda message: message.text == '🧮 Статистика')
+@dp.message_handler(lambda message: message.text == Keyboard.FEATURE_STATISTIC)
 async def statistic(message):
     await bot.send_message(message.chat.id, await phrases.render_statistics(), reply_markup=menu.features_menu())
 
