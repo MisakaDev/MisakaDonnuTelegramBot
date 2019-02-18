@@ -1,7 +1,8 @@
 import datetime
-import config
 
 from gino import Gino
+
+import config
 
 db = Gino()
 
@@ -41,6 +42,8 @@ class User(db.Model):
             Schedule.group_id == self.group_id
         ).where(
             Schedule.date == date.date()
+        ).order_by(
+            Schedule.pair_number
         ).gino.all()
 
 
