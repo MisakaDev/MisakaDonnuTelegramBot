@@ -102,6 +102,10 @@ class Schedule(db.Model):
     async def create(cls, group_id, date, pair_number, information):
         return await super().create(group_id=group_id, pair_number=pair_number, information=information, date=date)
 
+    @classmethod
+    async def clear(cls):
+        return await cls.delete.gino.status()
+
 
 class Statistic(db.Model):
     __tablename__ = 'statistics'
