@@ -4,6 +4,21 @@ MisakaDonnuTelegramBot - це бот телеграм який допомага�
 
 ## Встановлення
 
+Перед використанням бота встановіть наступні зміні оточення:
+```
+Для Windows: setx <VAR NAME>=<VALUE>
+Для Linux: export <VAR NAME>=<VALUE>
+```
+
+```
+DONNU_BOT_TELEGRAM_API_TOKEN - Токен Вашого бота
+DONNU_BOT_DB_HOST - Хост бази данних PostgreSQL
+DONNU_BOT_DB_NAME - Ім'я бази данних
+DONNU_BOT_DB_USER_LOGIN - Логін користувача 
+DONNU_BOT_DB_USER_PASSWORD - Пароль користувача
+```
+
+Клонуйне проект і запустіть:
 ```bash
 git clone https://github.com/MisakaDev/MisakaDonnuTelegramBot
 cd MisakaDonnuTelegramBot
