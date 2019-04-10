@@ -6,6 +6,7 @@ from aiogram.dispatcher import FSMContext
 import bot.helpers as helpers
 import bot.menu as menu
 import bot.phrases as phrases
+import config
 from db import User, Group
 from . import dp, bot
 from .phrases import Keyboard
@@ -180,6 +181,30 @@ async def user_help(message):
 @dp.message_handler(lambda message: message.text == Keyboard.FEATURE_STATISTIC)
 async def statistic(message):
     await bot.send_message(message.chat.id, await phrases.render_statistics(), reply_markup=menu.features_menu())
+
+
+@dp.message_handler(content_types=types.ContentTypes.DOCUMENT)
+async def admin_update_schedule(message):
+    if message.from_user.id not in config.TELEGRAM_BOT_ADMINS:
+        return await bot.send_message(message.chat.id, phrases.admin_update_schedule_error_not_admin())
+    if message.document.mime_type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        return await bot.send_message(message.chat.id, phrases.admin_update_schedule_error_bad_file())
+    source = await bot.download_file_by_id(message.document.file_id)
+    export_name = 'update.xlsx'
+    with open(export_name, 'wb') as file:
+        file.write(source.read())
+    from parsers.update import TableParser
+    from .middlewares import UpdateMiddleware
+    parser = TableParser(export_name)
+    try:
+        await parser.parse(check=True)
+        middleware = UpdateMiddleware(phrases.admin_update_schedule_user_message())
+        dp.middleware.setup(middleware)
+        await parser.parse()
+        dp.middleware.applications.remove(middleware)
+        await bot.send_message(message.chat.id, phrases.admin_update_schedule_success())
+    except Exception as error:
+        await bot.send_message(message.chat.id, phrases.admin_update_schedule_error_parse(error))
 
 
 @dp.message_handler()

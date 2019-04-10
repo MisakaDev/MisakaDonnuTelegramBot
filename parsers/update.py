@@ -1,4 +1,7 @@
 import asyncio
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 from openpyxl import load_workbook
 
@@ -18,10 +21,11 @@ class TableParser:
                 for col in range(crange.min_col, crange.max_col + 1):
                     self.table.cell(row, col).value = self.table.cell(crange.min_row, crange.min_col).value
 
-    async def parse(self):
-        await Schedule.clear()
+    async def parse(self, check=False):
+        if not check:
+            await Schedule.clear()
         for table_name in self.docs.sheetnames:
-            print(f"parse: {table_name}")
+            LOGGER.info(f"Start parse: {table_name}")
             self.table = self.docs.get_sheet_by_name(table_name)
 
             self._merged_cells_fill()
@@ -47,11 +51,12 @@ class TableParser:
                     for i in range(1, 9):
                         information = self.table.cell(row + 2 + i, col).value
                         if information:
-                            await Schedule.create(group_id, date, i, information)
+                            if not check:
+                                await Schedule.create(group_id, date, i, information)
 
                     col += 1
                 row += 12
-            print(f"parsed: {table_name}")
+            LOGGER.info(f"End parse: {table_name}")
 
 
 async def run():

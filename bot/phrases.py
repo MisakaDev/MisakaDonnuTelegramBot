@@ -60,6 +60,12 @@ features = lambda: random.choice(("Ось що я ще вмію",))
 
 user_has_no_group = lambda: random.choice(("Для початку вкажи свою групу в налаштуваннях",))
 
+admin_update_schedule_user_message = lambda: random.choice(("Бот оновлює данні. Спробуй ще раз через хвилину",))
+admin_update_schedule_success = lambda: random.choice(("Розклад успішно оновлено!",))
+admin_update_schedule_error_parse = lambda error: random.choice(("Помилка при оновлені: " + str(error),))
+admin_update_schedule_error_bad_file = lambda: random.choice(("Я не розумію що це за файл. Надішли мені таблицю!",))
+admin_update_schedule_error_not_admin = lambda: random.choice(("Ей, в тебе немає прав!",))
+
 
 def render_pair_info():
     return "\n".join(["{} {} пара: {}".format(
