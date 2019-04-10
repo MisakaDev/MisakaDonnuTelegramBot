@@ -6,12 +6,13 @@ MisakaDonnuTelegramBot - це бот телеграм який допомага�
 
 Перед використанням бота встановіть наступні зміні оточення:
 ```
-Для Windows: setx <VAR NAME>=<VALUE>
+Для Windows: setx <VAR NAME> <VALUE>
 Для Linux: export <VAR NAME>=<VALUE>
 ```
 
 ```
 DONNU_BOT_TELEGRAM_API_TOKEN - Токен Вашого бота
+DONNU_BOT_TELEGRAM_BOT_ADMINS - ID адміністраторів бота
 DONNU_BOT_DB_HOST - Хост бази данних PostgreSQL
 DONNU_BOT_DB_NAME - Ім'я бази данних
 DONNU_BOT_DB_USER_LOGIN - Логін користувача 
